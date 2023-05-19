@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Image Gallery</title>
+</head>
+<body>
+    <h1>My Image Gallery</h1>
+    <img id="gallery-image" src="{{ url_for('static', filename=latest_image) }}" alt="Gallery Image">
+    <script>
+        function updateImage() {
+            // Get the current image filename
+            var currentImage = document.getElementById('gallery-image').src.split('/').pop();
+            // Send a request to the server to check for a new image
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        // Parse the response JSON to get the latest image filename
+                        var response = JSON.parse(xhr.responseText);
+                        var latestImage = response.latest_image;
+                        // If the latest image is different from the current image, update the displayed image
+                        if (latestImage !== currentImage) {
+                            document.getElementById('gallery-image').src = "{{ url_for('static', filename='') }}" + latestImage;
+                        }
+                    } else {
+                        console.log('Error checking for new image');
+                    }
+                }
+            };
+            xhr.open('GET', '/check_for_new_image');
+            xhr.send();
+        }
+        // Call updateImage() every 5 seconds to check for a new image
+        setInterval(updateImage, 5000);
+    </script>
+</body>
+</html>
